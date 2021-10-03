@@ -10,21 +10,13 @@ body {
 
 <body>
 
-<buttton id ='toggle'> Press </buttton>
 <script src="https://threejs.org/build/three.min.js"></script>
 <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
 <script>
-//my script
-$('#toggle').click(
-fuction(){
-	axes.material.visible = ! axes.material.visible;
-});
 
 var renderer, scene, camera;
 var cube;
-var axes;
 
 init();
 animate();
@@ -42,8 +34,7 @@ function init () {
 	scene = new THREE.Scene();
 	var grid = new THREE.GridHelper(20,20, 0xaaaa00, 0x333333);
 	scene.add (grid);
-	
-	axes = new THREE.AxesHelper (5);
+	var axes = new THREE.AxesHelper (5);
 	scene.add (axes);
 	
 	camera = new THREE.PerspectiveCamera (35, width/height, 1, 100);
