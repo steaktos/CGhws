@@ -10,7 +10,8 @@ body {
 
 <body>
 
-<buttton id ='toggle'> Press </buttton>
+<button id='toggle'>Press</button>
+
 <script src="https://threejs.org/build/three.min.js"></script>
 <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -43,7 +44,7 @@ function init () {
 	var grid = new THREE.GridHelper(20,20, 0xaaaa00, 0x333333);
 	scene.add (grid);
 	
-	axes = new THREE.AxesHelper (5);
+	axes = new THREE.AxesHelper (15);
 	scene.add (axes);
 	
 	camera = new THREE.PerspectiveCamera (35, width/height, 1, 100);
