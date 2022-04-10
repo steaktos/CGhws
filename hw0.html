@@ -10,73 +10,62 @@ body {
 
 <body>
 
+<div id="info">I4B48 王品森</div>
 <script src="https://threejs.org/build/three.min.js"></script>
 <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-
-var renderer, scene, camera;
-var cube;
+var camera, scene, renderer;
+var leader, angle = 0;
+var puffs = [];
+const NPUFFS = 50;
+var which = 0;
 
 init();
 animate();
 
-function init () {
-	
-	renderer = new THREE.WebGLRenderer();
-	document.body.appendChild (renderer.domElement);
-	var width = window.innerWidth;
-	var height = window.innerHeight;
-	renderer.setSize (width, height);
-	
-	renderer.setClearColor (0x888888);
-	
-	scene = new THREE.Scene();
-	var grid = new THREE.GridHelper(20,20, 0xaaaa00, 0x333333);
-	scene.add (grid);
-	var axes = new THREE.AxesHelper (5);
-	scene.add (axes);
-	
-	camera = new THREE.PerspectiveCamera (35, width/height, 1, 100);
-	camera.position.y = 16;
-	camera.position.z = 40;
-	camera.lookAt (new THREE.Vector3(0,0,0));
-	
-	let controls = new THREE.OrbitControls(camera, renderer.domElement);
-	
-	window.addEventListener('resize', onWindowResize, false);
-	///////////////////////////////////////////////////////////////
-	var cubeGeometry = new THREE.CylinderGeometry( 6, 6, 23, 48 );
-	var cubeMaterial = new THREE.MeshNormalMaterial();
-	cube = new THREE.Mesh (cubeGeometry, cubeMaterial);
-	scene.add (cube);
-		
-}
+function init() {
 
-function onWindowResize() {
-  
-  var width = window.innerWidth;
-  var height = window.innerHeight;
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-	
+  scene = new THREE.Scene();
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.set(0, 150, 200); //z = 500;
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  ////////////////////////////////////////////////////////////////
+  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  scene.add(gridXZ);
+
+  leader = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 5, 20), new THREE.MeshNormalMaterial());
+  scene.add(leader);
+
+	let leaderStart = new THREE.Vector3(75,2.5,0);
+  // N puffs
 }
 
 function animate() {
-	
-	requestAnimationFrame(animate);
-	render();
-	
+
+  requestAnimationFrame(animate);
+  render();
+  angle += Math.PI/900;
+  leader.position.set(75 * Math.cos(angle), 2.5, -75 * Math.sin(angle));
+
+  ++which;
 }
 
 function render() {
-	
-	renderer.render(scene, camera);
-	
+
+  renderer.render(scene, camera);
+
 }
 
 </script>
 </body>
 
+</html>
 </html>
