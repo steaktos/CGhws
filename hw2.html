@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#heading {
+    position : absolute;
+    text-align : center;
+    width : 100vw;
+    bottom : 80vh;
+}
+</style>
+</head>
+<body> 
+<div id="info">I4B48 王品森</div>
+<div id='heading'>
+  <button id='click'> Minecraft's F5 </button>
+</div>
+	<script src="https://threejs.org/build/three.min.js"></script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/DDSLoader.js"></script>
+	<script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/MTLLoader.js"></script>
+	<script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/OBJLoader.js"></script>
+
+<script>
+
+var renderer,camera,scene;
+var angle = 0 ;
+const WW = 10,HH = 12;
+
+var state=1;
+
+var pose1 = {
+	lThigh: Math.PI/6,
+	rThigh: -Math.PI/6
+}
+
+var pose2 = {
+	lThigh: -Math.PI/6,
+	rThigh: +Math.PI/6
+}
+
+var keys = [
+	[0, pose1],
+	[0.5, pose2],
+	[1, pose1]
+];
+
+var minecraft = new THREE.Group();
+var head,leg_right,leg_left,hand_right,hand_left;
+
+var tg = 0 ;
+$('#click').click(function(){
+	tg=! tg;
+});
+
+var T = 1;
+var clock = new THREE.Clock();
+var ts = clock.getElapsedTime();
+
+
+init();
+animate();
+
+
+
+function keyframe(t) {
+
+	var s = ((t - ts) % T) / T;
+	console.log(keys);
+	for (var i = 1; i < keys.length; i++) {
+		if (keys[i][0] > s) break;
+	}
+
+
+
+	var ii = i - 1;
+	var a = (s - keys[ii][0]) / (keys[ii + 1][0] - keys[ii][0]);
+	intKey = [keys[ii][1].lThigh * (1 - a) + keys[ii + 1][1].lThigh * a,
+				keys[ii][1].rThigh * (1 - a) + keys[ii + 1][1].rThigh * a
+	];
+	return intKey;
+}
+
+function init(){
+
+	clock = new THREE.Clock();
+	renderer = new THREE.WebGLRenderer({antialias:true});
+	renderer.setSize (window.innerWidth,window.innerHeight);
+	renderer.setClearColor(0x888888);
+	document.body.appendChild(renderer.domElement);
+	
+	camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,1,1000);
+	camera.position.z = 200; // (0,0,50)
+	camera.position.y = 100; // (0,0,50)
+
+	var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+	scene = new THREE.Scene();
+	var grid = new THREE.GridHelper(150,10,'red','white');
+	scene.add(grid);
+	/////////////////////////////
+	
+	var loader = new THREE.TextureLoader();
+	loader.setCrossOrigin('');
+	texture = loader.load ('https://i.imgur.com/aMNNtvq.png');
+	
+	
+	let body = buildBody(12.4,19.1,6.2);
+	
+    head = buildHead2(12.4,12.4,12.4);
+	head.position.set(0,15.75,0);
+	//腳腳
+	leg_right = buildLeg(6.2,19.1,6.2);
+	leg_right.position.set(-3.1,-7,0);
+	
+	leg_left = buildLeg(6.2,19.1,6.2);
+	leg_left.position.set(3.1,-7,0);
+	//手手
+	hand_right = buildHand(6.2,19.1,6.2);
+	hand_right.position.set(-9.5,9.5,0);
+	
+	hand_left = buildHand(6.2,19.1,6.2);
+	hand_left.position.set(9.5,9.5,0);
+	
+	minecraft.add(body,head,leg_right,leg_left,hand_right,hand_left);
+	scene.add(minecraft);
+
+	
+	////////////light////////////////// 
+	
+	var ambient = new THREE.AmbientLight(0x444444);
+	scene.add(ambient);
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(0, 0, 1).normalize();
+	scene.add(directionalLight);
+
+	var pointLight = new THREE.PointLight (0xffffff);
+	pointLight.position.set (100,200,-100);
+	scene.add (pointLight);
+	
+}
+
+
+function buildHead(WW, HH, DD) {
+
+	 var geometry = new THREE.BufferGeometry();	
+	 var vertices = [];
+	 var indices = [];
+	 var uvs = [];
+
+	  let SS = 8.68;
+	  let TT = 5.01;
+	  var a = {u: 1.24, v:5.01};
+	  var b = {u: 2.48, v:5.01};
+	  var c = {u: 3.72, v:5.01};
+	  var d = {u: 0, v:3.77};
+	  var e = {u: 1.24, v:3.77};
+	  var f = {u: 2.48, v:3.77};
+	  var g = {u: 3.72, v:3.77};
+	  var h = {u: 4.96, v:3.77};
+	  var i = {u: 0, v:2.53};
+	  var j = {u: 1.24, v:2.53};
+	  var k = {u: 2.48, v:2.53};
+	  var l = {u: 3.72, v:2.53};
+	  var m = {u: 4.96, v:2.53};
+
+	  // PZ
+	  vertices.push(-WW/2,HH/2,DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,HH/2,DD/2 ); // 0,3,2,1
+	  indices.push(0,1,2, 0,2,3);
+		uvs.push (e.u/SS,e.v/TT, j.u/SS,j.v/TT, k.u/SS,k.v/TT, f.u/SS,f.v/TT); // e,j,k,f
+
+	  // PX
+	  vertices.push(WW/2,HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 1,2,6,5
+	  indices.push (4,5,6, 4,6,7); // [0,1,2, 0,2,3] + 4
+		uvs.push (f.u/SS,f.v/TT, k.u/SS,k.v/TT, l.u/SS,l.v/TT, g.u/SS,g.v/TT); // f,k,l,g
+		
+	  // NX
+	  vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, -WW/2,HH/2,DD/2 ); // 4,7,3,0
+	  indices.push (8,9,10, 8,10,11); // [0,1,2, 0,2,3] + 8
+		uvs.push (d.u/SS,d.v/TT, i.u/SS,i.v/TT, j.u/SS,j.v/TT, e.u/SS,e.v/TT); // d,i,j,e
+
+		
+	  geometry.setIndex(indices);  
+	  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+	  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));	
+		
+	  let head = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
+		return head;
+}
+
+function buildHead2(WW, HH, DD) {
+
+    var geometry = new THREE.BufferGeometry();	
+    var vertices = [];
+    var indices = [];
+    var uvs = [];
+
+    const ww = 1;
+    const hh = 3;
+    const SS = 14*ww;
+    const TT = hh + 5*ww;
+  
+	var a = {u: 2*ww, v: hh+5*ww};
+	var b = {u: 4*ww, v: hh+5*ww};
+	var c = {u: 6*ww, v: hh+5*ww};
+	var d = {u: 0, v: hh+3*ww};
+	var e = {u: 2*ww, v: hh+3*ww};
+	var f = {u: 4*ww, v: hh+3*ww};
+	var g = {u: 6*ww, v: hh+3*ww};
+	var h = {u: 8*ww, v: hh+3*ww};
+    var i = {u: 0, v: hh+ww};
+	var j = {u: 2*ww, v: hh+ww};
+	var k = {u: 4*ww, v: hh+ww};
+	var l = {u: 6*ww, v: hh+ww};
+	var m = {u: 8*ww, v: hh+ww};
+
+	// PZ
+	vertices.push(-WW/2,HH/2,DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,HH/2,DD/2 ); // 0,3,2,1
+	indices.push(0,1,2, 0,2,3);
+	uvs.push (e.u/SS,e.v/TT, j.u/SS,j.v/TT, k.u/SS,k.v/TT, f.u/SS,f.v/TT); // e,j,k,f
+
+	// PX
+	vertices.push(WW/2,HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 1,2,6,5
+	indices.push (4,5,6, 4,6,7); // [0,1,2, 0,2,3] + 4
+	uvs.push (f.u/SS,f.v/TT, k.u/SS,k.v/TT, l.u/SS,l.v/TT, g.u/SS,g.v/TT); // f,k,l,g
+	
+	// NX
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, -WW/2,HH/2,DD/2 ); // 4,7,3,0
+	indices.push (8,9,10, 8,10,11); // [0,1,2, 0,2,3] + 8
+	uvs.push (d.u/SS,d.v/TT, i.u/SS,i.v/TT, j.u/SS,j.v/TT, e.u/SS,e.v/TT); // d,i,j,e
+	
+	// NZ
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 4,7,6,5
+	indices.push (12,13,14, 12,14,15); // [0,1,2, 0,2,3] + 12
+	uvs.push (g.u/SS,g.v/TT, l.u/SS,l.v/TT, m.u/SS,m.v/TT, h.u/SS,h.v/TT); // g,l,m,h
+	
+	// PY
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,HH/2,DD/2, WW/2,HH/2,DD/2, WW/2,HH/2,-DD/2 ); // 4,0,1,5
+	indices.push (16,17,18, 16,18,19); // [0,1,2, 0,2,3] + 16
+	uvs.push (a.u/SS,a.v/TT, e.u/SS,e.v/TT, f.u/SS,f.v/TT, b.u/SS,b.v/TT); // a,e,f,b
+	
+	// NY
+	vertices.push(-WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2 ); // 7,3,2,6
+	indices.push (20,21,22, 20,22,23); // [0,1,2, 0,2,3] + 16
+	uvs.push (b.u/SS,b.v/TT, f.u/SS,f.v/TT, g.u/SS,g.v/TT, c.u/SS,c.v/TT); // b,f,g,c
+
+	geometry.setIndex(indices);   
+	geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+	geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));	
+	
+	let head = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
+	return head;
+}
+
+function buildBody(WW, HH, DD) {
+ 
+	var geometry = new THREE.BufferGeometry();	
+    var vertices = [];
+    var indices = [];
+	var uvs = [];
+
+ 　 let SS = 8.68;
+  　let TT = 5.01;
+  　var a = {u: 3.10, v:2.53};
+  　var b = {u: 4.34, v:2.53};
+  　var c = {u: 5.58, v:2.53};
+  　var d = {u: 2.48, v:1.91};
+  　var e = {u: 3.10, v:1.91};
+  　var f = {u: 4.34, v:1.91};
+  　var g = {u: 5.58, v:1.91};
+  　var h = {u: 6.20, v:1.91};
+  　var i = {u: 2.48, v:0};
+  　var j = {u: 3.10, v:0};
+  　var k = {u: 4.34, v:0};
+  　var l = {u: 5.58, v:0};
+  　var m = {u: 6.20, v:0};
+    var x = {u: 5.58, v:1.91};
+
+	// PZ
+    vertices.push(-WW/2,HH/2,DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,HH/2,DD/2 ); // 0,3,2,1
+    indices.push(0,1,2, 0,2,3);
+	uvs.push (e.u/SS,e.v/TT, j.u/SS,j.v/TT, k.u/SS,k.v/TT, f.u/SS,f.v/TT); // e,j,k,f
+
+	// PX
+    vertices.push(WW/2,HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 1,2,6,5
+    indices.push (4,5,6, 4,6,7); // [0,1,2, 0,2,3] + 4
+    uvs.push (f.u/SS,f.v/TT, k.u/SS,k.v/TT, l.u/SS,l.v/TT, g.u/SS,g.v/TT); // f,k,l,g
+	
+	// NX
+    vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, -WW/2,HH/2,DD/2 ); // 4,7,3,0
+    indices.push (8,9,10, 8,10,11); // [0,1,2, 0,2,3] + 8
+	uvs.push (d.u/SS,d.v/TT, i.u/SS,i.v/TT, j.u/SS,j.v/TT, e.u/SS,e.v/TT); // d,i,j,e
+
+	// NZ
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 4,7,6,5
+	indices.push(12,13,14, 12,14,15);
+　　uvs.push (g.u/SS,g.v/TT, l.u/SS,l.v/TT, m.u/SS,m.v/TT, h.u/SS,h.v/TT); // g,l,m,h
+
+	// PY
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,HH/2,DD/2, WW/2,HH/2,DD/2, WW/2,HH/2,-DD/2 ); // 4,0,1,5
+	indices.push(16,17,18, 16,18,19);
+　　uvs.push (a.u/SS,a.v/TT, e.u/SS,e.v/TT, f.u/SS,f.v/TT, b.u/SS,b.v/TT); // a,e,f,b
+
+	// NY
+	vertices.push(-WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2 ); // 7,3,2,6
+	indices.push(20,21,22, 20,22,23);
+　　uvs.push (b.u/SS,b.v/TT, f.u/SS,f.v/TT, x.u/SS,x.v/TT, c.u/SS,c.v/TT); // b,f,x,c
+ 
+    geometry.setIndex(indices);  
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));	
+	
+    let body = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
+	return body;
+}
+
+
+function buildLeg(WW, HH, DD) {
+ 
+	var geometry = new THREE.BufferGeometry();	
+    var vertices = [];
+    var indices = [];
+	var uvs = [];
+
+ 　 let SS = 8.68;
+  　let TT = 5.01;
+  
+  　var a = {u: 0.62, v:2.53};
+  　var b = {u: 1.24, v:2.53};
+  　var c = {u: 1.86, v:2.53};
+  　var d = {u: 0, v:1.91};
+  　var e = {u: 0.62, v:1.91};
+  　var f = {u: 1.24, v:1.91};
+  　var g = {u: 1.86, v:1.91};
+  　var h = {u: 2.48, v:1.91};
+  　var i = {u: 0, v:0};
+  　var j = {u: 0.62, v:0};
+  　var k = {u: 1.24, v:0};
+  　var l = {u: 1.86, v:0};
+  　var m = {u: 2.48, v:0};
+
+	// PZ
+	vertices.push(-WW/2,HH/2,DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,HH/2,DD/2 ); // 0,3,2,1
+	indices.push(0,1,2, 0,2,3);
+	uvs.push (e.u/SS,e.v/TT, j.u/SS,j.v/TT, k.u/SS,k.v/TT, f.u/SS,f.v/TT); // a,e,f,b
+
+	// PX
+    vertices.push(WW/2,HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 1,2,6,5
+    indices.push (4,5,6, 4,6,7); // [0,1,2, 0,2,3] + 4
+	uvs.push (f.u/SS,f.v/TT, k.u/SS,k.v/TT, l.u/SS,l.v/TT, g.u/SS,g.v/TT); // f,k,l,g
+	
+	// NX
+    vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, -WW/2,HH/2,DD/2 ); // 4,7,3,0
+    indices.push (8,9,10, 8,10,11); // [0,1,2, 0,2,3] + 8
+	uvs.push (d.u/SS,d.v/TT, i.u/SS,i.v/TT, j.u/SS,j.v/TT, e.u/SS,e.v/TT); // d,i,j,e
+
+	// NZ
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 4,7,6,5
+	indices.push(12,13,14, 12,14,15);
+　　uvs.push (g.u/SS,g.v/TT, l.u/SS,l.v/TT, m.u/SS,m.v/TT, h.u/SS,h.v/TT); // g,l,m,h
+
+	// PY
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,HH/2,DD/2, WW/2,HH/2,DD/2, WW/2,HH/2,-DD/2 ); // 4,0,1,5
+	indices.push(16,17,18, 16,18,19);
+　　uvs.push (a.u/SS,a.v/TT, e.u/SS,e.v/TT, f.u/SS,f.v/TT, b.u/SS,b.v/TT); // a,e,f,b
+
+	// NY
+	vertices.push(-WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2 ); // 7,3,2,6
+	indices.push(20,21,22, 20,22,23);
+　　uvs.push (b.u/SS,b.v/TT, f.u/SS,f.v/TT, g.u/SS,g.v/TT, c.u/SS,c.v/TT); // b,f,g,c
+ 
+    geometry.setIndex(indices);  
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));	
+
+	let leg = new THREE.Group();
+    let mesh = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
+	leg.add(mesh);
+	mesh.position.y = -HH/2;
+	return leg;
+}
+
+function buildHand(WW, HH, DD) {
+ 
+	var geometry = new THREE.BufferGeometry();	
+    var vertices = [];
+    var indices = [];
+	var uvs = [];
+
+ 　 let SS = 8.68;
+  　let TT = 5.01;
+		
+  　var a = {u: 6.82, v:2.53};
+  　var b = {u: 7.44, v:2.53};
+  　var c = {u: 8.06, v:2.53};
+  　var d = {u: 6.2, v:1.91};
+  　var e = {u: 6.82, v:1.91};
+  　var f = {u: 7.44, v:1.91};
+  　var g = {u: 8.06, v:1.91};
+  　var h = {u: 8.68, v:1.91};
+  　var i = {u: 6.2, v:0};
+  　var j = {u: 6.82, v:0};
+  　var k = {u: 7.44, v:0};
+  　var l = {u: 8.06, v:0};
+  　var m = {u: 8.68, v:0};
+
+	// PZ
+	vertices.push(-WW/2,HH/2,DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,HH/2,DD/2 ); // 0,3,2,1
+	indices.push(0,1,2, 0,2,3);
+	uvs.push (e.u/SS,e.v/TT, j.u/SS,j.v/TT, k.u/SS,k.v/TT, f.u/SS,f.v/TT); // a,e,f,b
+
+	// PX
+  vertices.push(WW/2,HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 1,2,6,5
+  indices.push (4,5,6, 4,6,7); // [0,1,2, 0,2,3] + 4
+	uvs.push (f.u/SS,f.v/TT, k.u/SS,k.v/TT, l.u/SS,l.v/TT, g.u/SS,g.v/TT); // f,k,l,g
+	
+	// NX
+  vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, -WW/2,HH/2,DD/2 ); // 4,7,3,0
+  indices.push (8,9,10, 8,10,11); // [0,1,2, 0,2,3] + 8
+	uvs.push (d.u/SS,d.v/TT, i.u/SS,i.v/TT, j.u/SS,j.v/TT, e.u/SS,e.v/TT); // d,i,j,e
+
+	// NZ
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,-HH/2,-DD/2, WW/2,-HH/2,-DD/2, WW/2,HH/2,-DD/2 ); // 4,7,6,5
+	indices.push(12,13,14, 12,14,15);
+　　uvs.push (g.u/SS,g.v/TT, l.u/SS,l.v/TT, m.u/SS,m.v/TT, h.u/SS,h.v/TT); // g,l,m,h
+
+	// PY
+	vertices.push(-WW/2,HH/2,-DD/2, -WW/2,HH/2,DD/2, WW/2,HH/2,DD/2, WW/2,HH/2,-DD/2 ); // 4,0,1,5
+	indices.push(16,17,18, 16,18,19);
+　　uvs.push (a.u/SS,a.v/TT, e.u/SS,e.v/TT, f.u/SS,f.v/TT, b.u/SS,b.v/TT); // a,e,f,b
+
+	// NY
+	vertices.push(-WW/2,-HH/2,-DD/2, -WW/2,-HH/2,DD/2, WW/2,-HH/2,DD/2, WW/2,-HH/2,-DD/2 ); // 7,3,2,6
+	indices.push(20,21,22, 20,22,23);
+　　uvs.push (b.u/SS,b.v/TT, f.u/SS,f.v/TT, g.u/SS,g.v/TT, c.u/SS,c.v/TT); // b,f,g,c
+ 
+    geometry.setIndex(indices);  
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+	
+	let hand = new THREE.Group();
+    let mesh = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
+	hand.add(mesh);
+	mesh.position.y = -HH/2;
+	return hand;
+}
+
+var theta = 0 ;
+
+function animate(){
+
+	var radius = 25 ;
+	var dt = clock.getDelta();
+	let R = 50;
+	let omega = HH/R/T;  
+	theta += omega*dt*8;
+	var count = theta/ (2*Math.PI);
+	if(count%2 < 1){
+		minecraft.position.set(radius*Math.cos(theta)-25 , 25.65,-radius * Math.sin(theta));
+		minecraft.rotation.y = theta+Math.PI;
+	    let intKey = keyframe(clock.getElapsedTime());
+
+		leg_right.rotation.x = intKey[0];
+		leg_left.rotation.x = intKey[1]; 
+		hand_left.rotation.x = intKey[0];
+		hand_right.rotation.x = intKey[1];
+	}
+	else{
+		theta += omega*dt*2;
+		minecraft.position.set(-radius/2*Math.sin(theta + Math.PI/2)+12.5,25.65,radius/2*Math.cos(theta+Math.PI/2));
+		minecraft.rotation.y = -(theta +Math.PI);
+		let intKey = keyframe(clock.getElapsedTime());
+		leg_right.rotation.x = intKey[0];
+		leg_left.rotation.x = intKey[1];
+	 	hand_left.rotation.x = intKey[0];
+		hand_right.rotation.x = intKey[1];
+	}
+	
+	//視角/////////////////////////
+	
+	if(tg){
+		let cameraPos = new THREE.Vector3(0,6*WW,-7*WW);
+		head.localToWorld (cameraPos);
+		camera.position.copy (cameraPos);
+		let cameraLookAt = new THREE.Vector3(0,2*WW,0);
+		head.localToWorld (cameraLookAt);
+		camera.lookAt (cameraLookAt);
+	}
+	
+	
+	renderer.render(scene,camera);
+	requestAnimationFrame(animate);
+	
+}
+</script>
+</body>
+</html>

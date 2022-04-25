@@ -10,7 +10,11 @@
 }
 </style>
 </head>
+<<<<<<< HEAD
 <body> 
+=======
+<body>
+>>>>>>> master
 <div id="info">I4B48 王品森</div>
 <h1 style="color:blue" id ='heading' ></h1>
 
@@ -43,7 +47,11 @@ class Puck {
 		this.force = new THREE.Vector3(-2,0,0);	// 0,-5,0
 		this.mesh = mesh;
 		scene.add (this.mesh);
+<<<<<<< HEAD
 		
+=======
+		//背景
+>>>>>>> master
 		this.light = new THREE.PointLight(0xffffff, 1);
 		this.light.position.set(10, 10, 10);
 		scene.add(this.light);
@@ -55,14 +63,21 @@ class Puck {
 	update(dt) {
 		this.vel.add (this.force.clone().multiplyScalar (dt));
 		this.pos.add (this.vel.clone().multiplyScalar (dt));
+<<<<<<< HEAD
 		//四
 		
+=======
+>>>>>>> master
 		if (this.pos.z < -100+R) {
 			this.vel.z = - this.vel.z;
 			this.pos.z = -100+R;
 		}
 		if (this.pos.z > 100-R) {
 			this.vel.z = - this.vel.z;
+<<<<<<< HEAD
+=======
+			
+>>>>>>> master
 			this.pos.z = 100-R;
 		}
 		
@@ -121,7 +136,11 @@ function init(){
 	
 	scene = new THREE.Scene();
 	
+<<<<<<< HEAD
 	//背景
+=======
+	
+>>>>>>> master
 	var floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshPhongMaterial({color: 0x484859, side: THREE.DoubleSide}));
 	floor.rotation.x = -Math.PI / 2;
 	
@@ -143,7 +162,12 @@ function init(){
 	let wall4 = new Wall (new THREE.Vector3(105,20,0),wallmesh4);
 	walls.push(wall4);
 
+<<<<<<< HEAD
 	///光///////////////////////////////////////////////////////////////////////
+=======
+
+	///光
+>>>>>>> master
 
 	var ambient = new THREE.AmbientLight(0x000000);
 	scene.add(ambient);
@@ -152,9 +176,16 @@ function init(){
 	var pointLight = new THREE.PointLight (0xffffff);
 	pointLight.position.set (100,200,-100);
 	scene.add (pointLight);
+<<<<<<< HEAD
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	let puckMesh = buildPuckMesh (new THREE.Color().setHSL (Math.random(), 2, .5));
+=======
+	
+	//////////////////////////////////////
+	
+	let puckMesh = buildPuckMesh (new THREE.Color().setHSL (Math.random(), 1, .5));
+>>>>>>> master
   
 	let puck1 = new Puck (new THREE.Vector3(20,2.1,10), new THREE.Vector3(-2,0,-5), puckMesh);	
 	pucks.push (puck1);
@@ -178,7 +209,11 @@ function init(){
   
 	let puck5 = new Puck (new THREE.Vector3(-18,2.1,-19), new THREE.Vector3(4,0,8), puckMesh);		
 	pucks.push (puck5);
+<<<<<<< HEAD
 	///////////////////////////////////////////////////////////////////////////////////////////////
+=======
+	//////////////////////////////////////////
+>>>>>>> master
 
 	scene.add(floor);
 	
@@ -201,6 +236,10 @@ function animate(){
 				let k = x1.lengthSq();
 				a = a/k;
 				b = b/k;
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 				x1.multiplyScalar(a).negate();
 				x2.multiplyScalar(b).negate();							
 				pucks[i].vel.add(x1);
