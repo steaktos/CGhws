@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#heading {
+    position : absolute;
+    text-align : center;
+    width : 100vw;
+    bottom : 80vh;
+}
+</style>
+</head>
+<body> 
+
+<div id='heading'>
+  <button id='click'> gyro Camera </button> <br/>
+</div>
+
+	<script src="https://threejs.org/build/three.min.js"></script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/DDSLoader.js"></script>
+	<script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/MTLLoader.js"></script>
+	<script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/loaders/OBJLoader.js"></script>
+	<script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/misc/Gyroscope.js"></script>
+	<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+	<script src="model.js"></script>
+	<script src="keyframe.js"></script>
+
+<script>
+
+var renderer,camera,scene;
+var gyro,camera1;
+var keyboard = new KeyboardState();
+
+var angle = 0 ;
+const WW = 10,HH = 12;
+
+
+var walk = false;
+var clock = new THREE.Clock();
+var ts;
+var state = 'Stand';
+var minecraft = new THREE.Group();
+var head,leg1,leg2,hand1,hand2;
+
+////////////////////////
+
+var pos = new THREE.Vector3();
+var speed, angle, vel;
+(function() {
+	Math.clamp = function(val,min,max){
+    return Math.min(Math.max(val,min),max);
+}})();
+
+
+/// gyro view click
+var tg = 0 ;
+$('#click').click(function(){
+	tg=! tg;
+	if(tg) $('#click').text("Perspective camera");
+	else {
+		$('#click').text("gyro camera");
+		camera.position.set(0,100,200);
+	}
+});
+
+var T = 1;
+var clock = new THREE.Clock();
+var ts = clock.getElapsedTime();
+
+init();
+animate();
+
+function init(){
+
+	clock = new THREE.Clock();
+	renderer = new THREE.WebGLRenderer({antialias:true});
+	renderer.setSize (window.innerWidth,window.innerHeight);
+	renderer.setClearColor(0x888888);
+	document.body.appendChild(renderer.domElement);
+	
+	camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,1,1000);
+	camera.position.z = 200; // (0,0,50)
+	camera.position.y = 100; // (0,0,50)
+	let controls = new THREE.OrbitControls(camera, renderer.domElement);
+	
+	camera1 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+	camera1.position.set(0,25,250);
+	let controls1 = new THREE.OrbitControls(camera1, renderer.domElement);
+
+	scene = new THREE.Scene();
+	var grid = new THREE.GridHelper(150,10,'red','white');
+	scene.add(grid);
+	/////////////////////////////
+	
+	var loader = new THREE.TextureLoader();
+	loader.setCrossOrigin('');
+	texture = loader.load ('https://i.imgur.com/ifFd1kO.png');
+	
+	let body = buildBody(12.4,19.1,6.2);
+	
+    head = buildHead(12.4,12.4,12.4);
+	head.position.set(0,15.75,0);
+	
+	leg1 = buildLeg(6.2,19.1,6.2);
+	leg1.position.set(-3.1,-7,0);
+	
+	leg2 = buildLeg(6.2,19.1,6.2);
+	leg2.position.set(3.1,-7,0);
+	
+	hand1 = buildHand(6.2,19.1,6.2);
+	hand1.position.set(-9.5,9.5,0);
+	
+	hand2 = buildHand(6.2,19.1,6.2);
+	hand2.position.set(9.5,9.5,0);
+	
+	minecraft.add(body,head,leg1,leg2,hand1,hand2);
+	scene.add(minecraft);
+	minecraft.rotation.y = Math.PI/2;
+
+	//window.addEventListener('resize', onWindowResize, false);
+	
+	////////////light////////////////// 
+	
+	var ambient = new THREE.AmbientLight(0x444444);
+	scene.add(ambient);
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(0, 0, 1).normalize();
+	scene.add(directionalLight);
+
+	var pointLight = new THREE.PointLight (0xffffff);
+	pointLight.position.set (100,200,-100);
+	scene.add (pointLight);
+	////////////////////////
+  
+	gyro = new THREE.Gyroscope();
+	minecraft.add(gyro);
+	gyro.add(camera1);
+	/////////////////////////
+	
+	leg1.rotation.x = 0; //Math.PI / 6;
+	leg2.rotation.x = 0; //-Math.PI / 6;
+
+	state = 'Stand';
+	ts = clock.getElapsedTime();
+	speed = 5.0;
+	angle = 0.0;
+}
+
+function update(dt) {
+
+	keyboard.update();
+	if ( keyboard.pressed("left") ) 
+		angle += 0.01;               
+	if ( keyboard.pressed("right") )
+		angle -= 0.01;               
+	if ( keyboard.pressed("up") )  
+		speed += 0.5;        
+	if ( keyboard.pressed("down") )  
+		speed -= 0.5;    
+
+	speed = Math.clamp (speed, 0.1, 20.0);		
+	vel = new THREE.Vector3(speed,0,0);
+	
+	vel.applyAxisAngle (new THREE.Vector3(0,1,0), angle);
+	pos.add (vel.clone().multiplyScalar(dt));
+	pos.y = 25.65;
+}
+
+var theta = 0 ;
+
+function animate(){
+	
+	minecraft.position.y = 25.65;
+	
+	keyboard.update();
+
+	if (keyboard.down('space')) { // move to walk
+		walk = true;
+		ts = clock.getElapsedTime(); // move ts to start of stand
+		state = 'S2W';
+		let intKey = keyframeS2W(ts, TS2W);
+		leg1.rotation.x = intKey[0];
+		leg2.rotation.x = intKey[1];
+	}
+	if (keyboard.up('space')) { // move to stand
+
+	}
+	if(walk){
+	
+		var dt = clock.getDelta();
+		let intKey;
+		switch (state) {
+			case 'Stand':
+			  //console.log('... in stand');
+			  intKey = keyframeStand(clock.getElapsedTime(), TStand);
+			  break;
+			case 'S2W':			
+			  //console.log('... in S2W');
+				intKey = keyframeS2W(clock.getElapsedTime(), TS2W); 
+				update(dt);		  
+			  break;
+			case 'Walk':
+			  console.log('... in walk');
+			  intKey = keyframeWalk(clock.getElapsedTime(), TWalk);
+			  update(dt);
+			  break;
+		}
+		minecraft.position.copy(pos);
+		minecraft.rotation.y = angle+Math.PI/2;
+		hand1.rotation.x = intKey[1];
+		hand2.rotation.x = intKey[0];
+		leg1.rotation.x = intKey[0];
+		leg2.rotation.x = intKey[1];
+	}
+		
+	if(tg){
+		renderer.render(scene,camera1);
+		requestAnimationFrame(animate);	
+	}
+	else{
+		renderer.render(scene,camera);
+		requestAnimationFrame(animate);
+	}
+	
+}
+</script>
+</body>
+</html>
